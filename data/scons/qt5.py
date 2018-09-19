@@ -372,31 +372,31 @@ def enable_modules(self, modules, debug=False, crosscompiling=False) :
         import sys
 
         validModules = [
-                'QtCore',
-                'QtGui',
-                'QtWidgets',
-                'QtOpenGL',
-                'Qt3Support',
-                'QtAssistant', # deprecated
-                'QtAssistantClient',
-                'QtScript',
-                'QtDBus',
-                'QtSql',
-                'QtSvg',
+                'Qt5Core',
+                'Qt5Gui',
+                'Qt5Widgets',
+                'Qt5OpenGL',
+                #'Qt3Support',
+                #'QtAssistant', # deprecated
+                #'QtAssistantClient',
+                #'QtScript',
+                #'QtDBus',
+                #'QtSql',
+                #'QtSvg',
                 # The next modules have not been tested yet so, please
                 # maybe they require additional work on non Linux platforms
-                'QtNetwork',
-                'QtTest',
-                'QtXml',
-                'QtXmlPatterns',
-                'QtUiTools',
-                'QtDesigner',
-                'QtDesignerComponents',
-                'QtWebKit',
-                'QtHelp',
-                'QtScript',
-                'QtScriptTools',
-                'QtMultimedia',
+                'Qt5Network',
+                #'QtTest',
+                'Qt5Xml',
+                'Qt5XmlPatterns',
+                #'QtUiTools',
+                #'QtDesigner',
+                #'QtDesignerComponents',
+                #'QtWebKit',
+                #'QtHelp',
+                #'QtScript',
+                #'QtScriptTools',
+                #'QtMultimedia',
                 ]
         pclessModules = [
 # in qt <= 4.3 designer and designerComponents are pcless, on qt5.4 they are not, so removed.
@@ -404,7 +404,7 @@ def enable_modules(self, modules, debug=False, crosscompiling=False) :
 #               'QtDesignerComponents',
         ]
         staticModules = [
-                'QtUiTools',
+                #'QtUiTools',
         ]
         invalidModules=[]
         for module in modules:
