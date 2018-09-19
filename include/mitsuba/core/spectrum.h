@@ -27,8 +27,14 @@
     specified in the configuration file!
 #endif
 
-#define SPECTRUM_MIN_WAVELENGTH   360
-#define SPECTRUM_MAX_WAVELENGTH   830
+#if !defined(SPECTRUM_MIN_WAVELENGTH)
+        #define SPECTRUM_MIN_WAVELENGTH   360
+#endif
+
+#if !defined(SPECTRUM_MAX_WAVELENGTH)
+        #define SPECTRUM_MAX_WAVELENGTH   830
+#endif
+
 #define SPECTRUM_RANGE                \
     (SPECTRUM_MAX_WAVELENGTH-SPECTRUM_MIN_WAVELENGTH)
 
