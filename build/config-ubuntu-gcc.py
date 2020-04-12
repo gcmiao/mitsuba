@@ -1,14 +1,14 @@
 import os, sys
 
 BUILDDIR       = '#build/release'
-DISTDIR        = '#dist'
+DISTDIR        = '#dist/release'
 CXX            = 'g++'
 CC             = 'gcc'
-CXXFLAGS       = ['-O3', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DSINGLE_PRECISION', '-DSPECTRUM_SAMPLES=35', '-DSPECTRUM_MIN_WAVELENGTH=380', '-DSPECTRUM_MAX_WAVELENGTH=730', '-DMTS_SSE', '-DMTS_HAS_COHERENT_RT', '-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2', '-fPIC', '-std=gnu++11']
-LINKFLAGS      = []
-SHLINKFLAGS    = ['-rdynamic', '-shared', '-fPIC', '-lstdc++']
-BASEINCLUDE    = ['#include']
-BASELIB        = ['dl', 'm', 'pthread', 'gomp']
+CXXFLAGS       = ['-O3', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DSINGLE_PRECISION', '-DSPECTRUM_SAMPLES=3', '-DMTS_SSE', '-DMTS_HAS_COHERENT_RT', '-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2', '-fPIC', '-std=gnu++11']
+LINKFLAGS      = ['-lhdf5_cpp', '-lhdf5_serial']
+SHLINKFLAGS    = ['-rdynamic', '-shared', '-fPIC', '-lstdc++', '-lhdf5_cpp', '-lhdf5_serial']
+BASEINCLUDE    = ['#include', '/usr/include/hdf5/serial/']
+BASELIB        = ['dl', 'm', 'pthread', 'gomp', 'hdf5_cpp', 'hdf5_serial', 'gmp']
 EIGENINCLUDE   = ['/usr/include/eigen3']
 OEXRINCLUDE    = ['/usr/include/OpenEXR']
 OEXRLIB        = ['Half', 'IlmImf', 'z']
