@@ -32,6 +32,7 @@
 MTS_NAMESPACE_BEGIN
 
 /*!\plugin{gridvolume}{Grid-based volume data source}
+ * \order{2}
  * \parameters{
  *     \parameter{filename}{\String}{
  *       Specifies the filename of the volume data file to be loaded
@@ -75,7 +76,7 @@ MTS_NAMESPACE_BEGIN
  * Bytes 9-12 &  Number of cells along the X axis (32 bit integer)\\
  * Bytes 13-16 &  Number of cells along the Y axis (32 bit integer)\\
  * Bytes 17-20 &  Number of cells along the Z axis (32 bit integer)\\
- * Bytes 21-24 &  Number of channels (32 bit integer, supported values: 1 or 3)\\
+ * Bytes 21-24 &  Number of channels (32 bit integer, supported values: 1, 3 or 6 (SGGX))\\
  * Bytes 25-48 &  Axis-aligned bounding box of the data stored in single
  *                precision (order: xmin, ymin, zmin, xmax, ymax, zmax)\\
  * Bytes 49-*  &  Binary data of the volume stored in the specified encoding.
@@ -95,6 +96,12 @@ MTS_NAMESPACE_BEGIN
  * please ensure that the values are all normalized to lie in the
  * range $[0, 1]$---otherwise, the Woodcock-Tracking integration method in
  * \pluginref{heterogeneous} will produce incorrect results.
+ * 
+ * \subsubsection*{SGGX parameters}
+ * When used as source for spatially varying SGGX parameters, each voxel
+ * contains 6 uint8-quantized values that determine the SGGX ellipsoid shape.
+ * They are stored in the order $\sigma_x$, $\sigma_{y}$, $\sigma_{z}$, 
+ * $r_{xy}$, $r_{xz}$, $r_{yz}$. Please see the paper \cite{heitz2015sggx} for details.
  */
 class GridDataSource : public VolumeDataSource {
 public:
@@ -253,9 +260,9 @@ public:
                 Log(EError, "Error: float16 volumes are not yet supported!");
             case EUInt8:
                 format = "uint8";
-                if (m_channels != 1 && m_channels != 3)
+                if (m_channels != 1 && m_channels != 3 && m_channels != 6)
                     Log(EError, "Encountered an unsupported uint8 volume data "
-                        "file (%i channels, only 1 and 3 are supported)", m_channels);
+                        "file (%i channels, only 1, 3 or 6 are supported)", m_channels);
                 break;
             case EQuantizedDirections:
                 format = "qdir";
@@ -574,7 +581,47 @@ public:
         else
             return Vector(0.0f);
     }
-
+    
+    void lookupSGGX(const Point &_p, Float *S) const{
+        if (m_volumeType != EUInt8) {
+            return;
+        }
+        const Point p = m_worldToGrid.transformAffine(_p);
+        const int x1 = math::floorToInt(p.x),
+            y1 = math::floorToInt(p.y),
+            z1 = math::floorToInt(p.z),
+            x2 = x1 + 1, y2 = y1 + 1, z2 = z1 + 1;
+        memset(S, 0, 6*sizeof(Float));
+        if (x1 < 0 || y1 < 0 || z1 < 0 || x2 >= m_res.x ||
+            y2 >= m_res.y || z2 >= m_res.z)
+                return;
+        const Float fx = p.x - x1, fy = p.y - y1, fz = p.z - z1;
+        Float _fx = 1.0f - fx, _fy = 1.0f - fy, _fz = 1.0f - fz;
+        Vector sigma;
+        Vector r;
+        for (int k = 0; k<8; ++k) {
+            uint32_t index = (((k & 4) ? z2 : z1) * m_res.y +
+                ((k & 2) ? y2 : y1)) * m_res.x + ((k & 1) ? x2 : x1);
+            Float factor = ((k & 1) ? fx : _fx) * ((k & 2) ? fy : _fy)
+                * ((k & 4) ? fz : _fz);
+            sigma = Vector(m_densityMap[m_data[index * 6]],
+                           m_densityMap[m_data[index * 6 + 1]],
+                           m_densityMap[m_data[index * 6 + 2]]);
+            r = Vector(m_densityMap[m_data[index * 6 + 3]],
+                       m_densityMap[m_data[index * 6 + 4]],
+                       m_densityMap[m_data[index * 6 + 5]]);
+            r = r * 2.0;
+            r.x = r.x - 1.0;
+            r.y = r.y - 1.0;
+            r.z = r.z - 1.0;
+            S[0] += factor * sigma.x * sigma.x;
+            S[1] += factor * sigma.y * sigma.y;
+            S[2] += factor * sigma.z * sigma.z;
+            S[3] += factor * r.x * sigma.x * sigma.y;
+            S[4] += factor * r.y * sigma.x * sigma.z;
+            S[5] += factor * r.z * sigma.y * sigma.z;
+        }
+    }
     bool supportsFloatLookups() const { return m_channels == 1; }
     bool supportsSpectrumLookups() const { return m_channels == 3; }
     bool supportsVectorLookups() const { return m_channels == 3; }
@@ -583,6 +630,7 @@ public:
     Float getMaximumFloatValue() const {
         return 1.0f;
     }
+
 
     std::string toString() const {
         std::ostringstream oss;

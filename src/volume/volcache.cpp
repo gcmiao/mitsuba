@@ -44,6 +44,7 @@ struct Vector3iKeyOrder : public std::binary_function<Vector3i, Vector3i, bool> 
 };
 
 /*!\plugin{volcache}{Caching volume data source}
+ * \order{4}
  * \parameters{
  *     \parameter{blockSize}{\Integer}{
  *         Size of the individual cache blocks
@@ -250,9 +251,13 @@ public:
     Spectrum lookupSpectrum(const Point &_p) const {
         return Spectrum(0.0f);
     }
-
+    
     Vector lookupVector(const Point &_p) const {
         return Vector(0.0f);
+    }
+    
+    void lookupSGGX(const Point &_p, Float *S) const {
+        memset(S, 0, 6 * sizeof(Float));
     }
 
     bool supportsFloatLookups() const {

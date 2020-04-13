@@ -57,6 +57,9 @@ public:
     /// Look up a vector value by position
     virtual Vector lookupVector(const Point &p) const;
 
+    /// Look up SGGX parameters (S_xx, S_yy, S_zz, S_xy, S_xz, S_yz)
+    virtual void lookupSGGX(const Point &_p, Float *S) const;
+    
     /**
      * \brief Return the recommended step size for numerical
      * integration or inifinity if this is not known/applicable

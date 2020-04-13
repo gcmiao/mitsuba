@@ -36,6 +36,7 @@ static StatsCounter avgSampleIterations("Micro-flake model",
 #endif
 
 /*!\plugin{microflake}{Micro-flake phase function}
+ * \order{4}
  * \parameters{
  *     \parameter{stddev}{\Float}{
  *       Standard deviation of the micro-flake normals. This

@@ -54,6 +54,10 @@ Vector VolumeDataSource::lookupVector(const Point &p) const {
     return Vector();
 }
 
+void VolumeDataSource::lookupSGGX(const Point &_p, Float *S) const {
+    Log(EError, "'%s': does not implement lookupSGGX()!", getClass()->getName().c_str());
+}
+
 bool VolumeDataSource::supportsFloatLookups() const {
     return false;
 }

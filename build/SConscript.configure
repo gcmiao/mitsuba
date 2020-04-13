@@ -55,6 +55,7 @@ for ver in python_versions:
         vars.Add('PYTHON' + key + 'LIBDIR',  'Python '+ ver +' library path')
 
 vars.Add('EIGENINCLUDE',    'Eigen 3.x include path')
+vars.Add('HDF5INCLUDE',     'HDF5 include path')
 vars.Add('XERCESINCLUDE',   'Xerces-C include path')
 vars.Add('XERCESLIB',       'Xerces-C libraries')
 vars.Add('XERCESLIBDIR',    'Xerces-C library path')
@@ -122,6 +123,8 @@ if env.has_key('OEXRLIBDIR'):
         env.Prepend(LIBPATH=env['OEXRLIBDIR'])
 if env.has_key('EIGENINCLUDE'):
         env.Prepend(CPPPATH=env['EIGENINCLUDE'])
+if env.has_key('HDF5INCLUDE'):
+        env.Prepend(CPPPATH=env['HDF5INCLUDE'])
 
 env.Decider('MD5-timestamp')
 

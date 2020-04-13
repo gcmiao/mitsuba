@@ -22,6 +22,7 @@
 MTS_NAMESPACE_BEGIN
 
 /*!\plugin{constvolume}{Constant-valued volume data source}
+ * \order{1}
  * \parameters{
  *     \parameter{value}{\Float\Or\Spectrum\Or\Vector}{
  *       Specifies the value of the volume
@@ -103,9 +104,13 @@ public:
     Spectrum lookupSpectrum(const Point &p) const {
         return m_spectrum;
     }
-
+    
     Vector lookupVector(const Point &p) const {
         return m_vector;
+    }
+    
+    void lookupSGGX(const Point &p, Float *S) const {
+        memset(S, 0, 6 * sizeof(Float));
     }
 
     bool supportsFloatLookups() const {

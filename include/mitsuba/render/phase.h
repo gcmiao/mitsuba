@@ -205,6 +205,20 @@ public:
      *    direction of propagation
      */
     virtual Float sigmaDir(Float cosTheta) const;
+    
+    /**
+     * @brief Same as sigmaDir but specialized for SGGX, which receives a
+     * parameter vector per voxel.
+     * 
+     * @param S
+     *      Parameter vector [S_xx, S_yy, S_zz, S_xy, S_xz, S_yz]
+     * @param v
+     *      Direction to evaluate for
+     */
+    virtual Float sigmaDirSGGX(Float *S, Vector v) const {
+        Log(EError, "sigmaDir_sggx not defined");
+		return 0.;
+	}
 
     /**
      * \brief Returns the maximum value take on on by \ref sigmaDirMax().
@@ -222,7 +236,7 @@ public:
 
     /// Return a string representation
     virtual std::string toString() const = 0;
-
+	
     MTS_DECLARE_CLASS()
 protected:
     /// Create a new phase function instance

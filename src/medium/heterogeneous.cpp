@@ -44,7 +44,7 @@ static StatsCounter earlyExits("Heterogeneous volume",
         "Number of early exits", EPercentage);
 #endif
 
-/*!\plugin{heterogeneous}{Heterogeneous participating medium}
+/*! \plugin{heterogeneous}{Heterogeneous participating medium}
  * \order{2}
  * \parameters{
  *     \parameter{method}{\String}{
@@ -75,6 +75,12 @@ static StatsCounter earlyExits("Heterogeneous volume",
  *     \parameter{orientation}{\Volume}{
  *         Optional: volumetric data source that supplies the
  *         local particle orientations throughout the medium
+ *     }
+ *     \parameter{sggx}{\Volume}{
+ *         Optional: volumetric data source that supplies the
+ *         SGGX phase function parameters throughout the medium,
+ *         see \pluginref{gridvolume}
+ *         (the phase function must be set to sggx accordingly)
  *     }
  *     \parameter{scale}{\Float}{
  *         Optional scale factor that will be applied to the \code{density} parameter.
@@ -209,6 +215,7 @@ public:
         m_density = static_cast<VolumeDataSource *>(manager->getInstance(stream));
         m_albedo = static_cast<VolumeDataSource *>(manager->getInstance(stream));
         m_orientation = static_cast<VolumeDataSource *>(manager->getInstance(stream));
+        m_sggx = static_cast<VolumeDataSource *>(manager->getInstance(stream));
         m_stepSize = stream->readFloat();
         configure();
     }
@@ -221,6 +228,7 @@ public:
         manager->serialize(stream, m_density.get());
         manager->serialize(stream, m_albedo.get());
         manager->serialize(stream, m_orientation.get());
+        manager->serialize(stream, m_sggx.get());
         stream->writeFloat(m_stepSize);
     }
 
@@ -247,6 +255,9 @@ public:
             if (m_orientation != NULL)
                 m_stepSize = std::min(m_stepSize,
                     m_orientation->getStepSize());
+            if (m_sggx != NULL)
+                m_stepSize = std::min(m_stepSize,
+                m_sggx->getStepSize());
 
             if (m_stepSize == std::numeric_limits<Float>::infinity())
                 Log(EError, "Unable to infer a suitable step size for deterministic "
@@ -254,9 +265,9 @@ public:
                         "parameter.");
         }
 
-        if (m_anisotropicMedium && m_orientation.get() == NULL)
+        if (m_anisotropicMedium && m_orientation.get() == NULL && m_sggx.get() == NULL)
             Log(EError, "Cannot use anisotropic phase function: "
-                "did not specify a particle orientation field!");
+                "did not specify a particle orientation or SGGX parameter field!");
     }
 
     void addChild(const std::string &name, ConfigurableObject *child) {
@@ -272,6 +283,8 @@ public:
             } else if (name == "orientation") {
                 Assert(volume->supportsVectorLookups());
                 m_orientation = volume;
+            }else if (name == "sggx"){
+                m_sggx = volume;
             } else {
                 Medium::addChild(name, child);
             }
@@ -602,6 +615,8 @@ public:
                 mRec.sigmaA = Spectrum(densityAtT) - mRec.sigmaS;
                 mRec.orientation = m_orientation != NULL
                     ? m_orientation->lookupVector(mRec.p) : Vector(0.0f);
+                if (m_sggx != NULL)
+                    m_sggx->lookupSGGX(mRec.p, mRec.sggxS);
             }
 
             Float expVal = math::fastexp(-integratedDensity);
@@ -651,6 +666,8 @@ public:
                         mRec.transmittance = Spectrum(0.0f);
                     mRec.orientation = m_orientation != NULL
                         ? m_orientation->lookupVector(p) : Vector(0.0f);
+                    if (m_sggx != NULL)
+                        m_sggx->lookupSGGX(mRec.p, mRec.sggxS);
                     mRec.medium = this;
                     success = true;
                     break;
@@ -711,11 +728,17 @@ protected:
     inline Float lookupDensity(const Point &p, const Vector &d) const {
         Float density = m_density->lookupFloat(p);
         if (m_anisotropicMedium && density != 0) {
-            Vector orientation = m_orientation->lookupVector(p);
-            if (!orientation.isZero())
-                density *= m_phaseFunction->sigmaDir(dot(d, orientation));
-            else
-                return 0;
+            if (m_orientation != NULL) {
+                Vector orientation = m_orientation->lookupVector(p);
+                if (!orientation.isZero())
+                    density *= m_phaseFunction->sigmaDir(dot(d, orientation));
+                else
+                    return 0;
+            } else if (m_sggx != NULL) {
+                Float S[6];
+                m_sggx->lookupSGGX(p, S);
+                density *= m_phaseFunction->sigmaDirSGGX(S, d);
+            }
         }
         return density;
     }
@@ -724,6 +747,7 @@ protected:
     ref<VolumeDataSource> m_density;
     ref<VolumeDataSource> m_albedo;
     ref<VolumeDataSource> m_orientation;
+    ref<VolumeDataSource> m_sggx;
     Float m_scale;
     bool m_anisotropicMedium;
     Float m_stepSize;

@@ -24,11 +24,33 @@
 
 MTS_NAMESPACE_BEGIN
 
-/**
+
+/*!\plugin{hgridvolume}{Hierarchical grid-based volume data source}
+ * \order{3}
+ * \parameters{
+ *     \parameter{filename}{\String}{
+ *       Specifies the filename of the volume data file to be loaded
+ *     }
+ *     \parameter{prefix}{\String}{
+ *       Specifies the filename prefix of the individual volume cells,
+ *       specifically printf("%s%03i\_%03i\_%03i%s", prefix, x, y, z, postfix),
+ *       e.g. "cell001\_001\_001.vol"
+ *     }
+ *     \parameter{postfix}{\String}{
+ *       Specifies the filename postfix of the individual volume cells,
+ *       specifically printf("%s%03i\_%03i\_%03i%s", prefix, x, y, z, postfix),
+ *       e.g. "cell001\_001\_001.vol"
+ *     }
+ *     \parameter{toWorld}{\Transform}{
+ *         Optional linear transformation that should be applied to the data
+ *     }
+ * }
+ *
  * This class implements a two-layer hierarchical grid
  * using 'gridvolume'-based files. It loads a dictionary
- * and then proceeds to map volume data into memory
+ * and then proceeds to map volume data into memory.
  */
+
 class HierarchicalGridDataSource : public VolumeDataSource {
 public:
     HierarchicalGridDataSource(const Properties &props)
@@ -174,7 +196,7 @@ public:
         else
             return block->lookupSpectrum(_p);
     }
-
+    
     Vector lookupVector(const Point &_p) const {
         const Point p = m_worldToGrid.transformAffine(_p);
         const int x = math::floorToInt(p.x),
@@ -190,6 +212,22 @@ public:
             return Vector();
         else
             return block->lookupVector(_p);
+    }
+    
+    void lookupSGGX(const Point &_p, Float *S) const {
+        memset(S, 0, 6 * sizeof(Float));
+        const Point p = m_worldToGrid.transformAffine(_p);
+        const int x = math::floorToInt(p.x),
+              y = math::floorToInt(p.y),
+              z = math::floorToInt(p.z);
+        if (x < 0 || x >= m_res.x ||
+            y < 0 || y >= m_res.y ||
+            z < 0 || z >= m_res.z)
+            return;
+
+        VolumeDataSource *block = m_blocks[((z * m_res.y) + y) * m_res.x + x];
+        if (block != NULL)
+            block->lookupSGGX(_p, S);
     }
 
     Float getMaximumFloatValue() const {

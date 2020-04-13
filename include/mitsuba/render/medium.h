@@ -45,7 +45,10 @@ public:
 
     /// Local particle orientation at \ref p
     Vector orientation;
-
+    
+    /// SGGX parameters (S_xx, S_yy, S_zz, S_xy, S_xz, S_yz)
+    Float sggxS[6];
+    
     /**
      * \brief Specifies the transmittance along the segment [mint, t]
      *
@@ -88,7 +91,7 @@ public:
     const Medium *medium;
 
 public:
-    inline MediumSamplingRecord() : medium(NULL) { }
+    inline MediumSamplingRecord() : medium(NULL) { memset(sggxS, 0, sizeof(sggxS)); }
 
     /// Return a pointer to the phase function
     inline const PhaseFunction *getPhaseFunction() const;
