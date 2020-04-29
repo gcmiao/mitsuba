@@ -42,7 +42,8 @@ def find_boost_python(version):
     libnames = [
         'boost_python-mt-py%s' % version,
         'boost_python-py%s' % version,
-        'boost_python' + ('3' if version.startswith('3') else '')
+        'boost_python' + ('3' if version.startswith('3') else ''),
+        'boost_python' + version
     ]
     basepaths = [
         '/usr/lib',
