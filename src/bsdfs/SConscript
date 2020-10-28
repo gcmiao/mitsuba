@@ -32,7 +32,7 @@ plugins += env.SharedLibrary('thindielectric', ['thindielectric.cpp'])
 btfEnv = env.Clone()
 if btfEnv.has_key('HDF5INCLUDE'):
         btfEnv.Prepend(CPPPATH=env['HDF5INCLUDE'])
-plugins += btfEnv.SharedLibrary('btf_tensor', ['btf_tensor.cpp'])
+#plugins += btfEnv.SharedLibrary('btf_tensor', ['btf_tensor.cpp'])
 
 # The Irawan-Marschner plugin uses a Boost::Spirit parser, which makes it
 # pretty heavy stuff to compile. Go easy on the compiler flags:
