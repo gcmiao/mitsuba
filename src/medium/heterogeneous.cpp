@@ -707,6 +707,12 @@ public:
         }
     }
 
+    void lookupSGGX(const Point &_p, Float *S) const
+    {
+        if (m_sggx != NULL)
+            m_sggx->lookupSGGX(_p, S);
+    }
+
     bool isHomogeneous() const {
         return false;
     }

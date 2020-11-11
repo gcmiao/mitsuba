@@ -1,6 +1,6 @@
 import os, sys
 
-BUILDDIR       = '#build/release'
+BUILDDIR       = '#build/debug'
 DISTDIR        = '#dist'
 CXX            = 'g++'
 CC             = 'gcc'

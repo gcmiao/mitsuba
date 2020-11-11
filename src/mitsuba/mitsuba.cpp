@@ -34,6 +34,8 @@
 #include <mitsuba/core/statistics.h>
 #include <mitsuba/render/renderjob.h>
 #include <mitsuba/render/scenehandler.h>
+#include <mitsuba/render/medium.h>
+#include <mitsuba/render/volume.h>
 #include <fstream>
 #include <stdexcept>
 #include <boost/algorithm/string.hpp>
@@ -125,6 +127,8 @@ private:
     ref<WaitFlag> m_flag;
     int m_timeout;
 };
+
+void testSGGX(const Medium* media);
 
 int mitsuba_app(int argc, char **argv) {
     int optchar;
@@ -389,6 +393,10 @@ int mitsuba_app(int argc, char **argv) {
 
             ref<RenderJob> thr = new RenderJob(formatString("ren%i", jobIdx++),
                 scene, renderQueue, -1, -1, -1, true, flushTimer > 0);
+            
+            // auto medias = scene->getMedia();
+            // testSGGX(medias[0]);
+
             thr->start();
 
             renderQueue->waitLeft(numParallelScenes-1);
@@ -415,6 +423,70 @@ int mitsuba_app(int argc, char **argv) {
     }
 
     return 0;
+}
+
+void testSGGXSample(const PhaseFunction* phase, Sampler *sampler, Float S[], const Vector3f& wi)
+{
+    MediumSamplingRecord msRec;
+    for (int i = 0; i < 6; ++i)
+    {
+        msRec.sggxS[i] = S[i];
+    }
+    PhaseFunctionSamplingRecord pfRec(msRec, wi);
+    auto ret = phase->sample(pfRec, sampler);
+    printf("phase sample: %f %f %f %f\n", ret, pfRec.wo.x, pfRec.wo.y, pfRec.wo.z);
+}
+
+void testSGGXEval(const PhaseFunction* phase, Float S[], const Vector3f& wi, const Vector3f& wo)
+{
+    MediumSamplingRecord msRec;
+    for (int i = 0; i < 6; ++i)
+    {
+        msRec.sggxS[i] = S[i];
+    }
+    PhaseFunctionSamplingRecord pfRec(msRec, wi);
+    pfRec.wo = wo;
+    auto ret = phase->eval(pfRec);
+    printf("phase eval: %f\n", ret);
+}
+
+void testSGGXPhase(const PhaseFunction* phase, Float S[], const Vector3f& v)
+{
+    auto sigma = phase->sigmaDirSGGX(S, v);
+    printf("sigma: %f\n", sigma);
+
+    testSGGXEval(phase, S, Vector3f(0.938753f, 0.334289f, 0.083629f), Vector3f(-0.206632f, 0.389584f, -0.897512f));
+    testSGGXEval(phase, S, Vector3f(-0.082558f, 0.319651f, -0.943932f), Vector3f(-0.883820f, -0.461389f, 0.077343f));
+    testSGGXEval(phase, S, Vector3f(0.883820f, 0.461389f, -0.077343f), Vector3f(0.160362f, -0.987058f, 0.000641f));
+    testSGGXEval(phase, S, Vector3f(0.876790f, 0.275073f, 0.394429f), Vector3f(-0.735200f, 0.168386f, 0.656603f));
+
+    Sampler *sampler = static_cast<Sampler *>(Scheduler::getInstance()->getResource(2, 0));
+    testSGGXSample(phase, sampler, S, Vector3f(0.938753f, 0.334289f, 0.083629f));
+    testSGGXSample(phase, sampler, S, Vector3f(0.876790f, 0.275073f, 0.394429f));
+    testSGGXSample(phase, sampler, S, Vector3f(-0.082558f, 0.319651f, -0.943932f));
+    testSGGXSample(phase, sampler, S, Vector3f(0.883820f, 0.461389f, -0.077343f));
+}
+
+void testSGGX(const Medium* media, const Point3f& p)
+{
+    Float retS[6];
+    media->lookupSGGX(p, retS);
+    printf("%f %f %f %f %f\n", retS[0], retS[1], retS[2], retS[3], retS[4], retS[5]);
+
+    auto phase = media->getPhaseFunction();
+    testSGGXPhase(phase, retS, Vector3f(-0.938753f, -0.334289f, -0.083629f));
+    testSGGXPhase(phase, retS, Vector3f(-0.206632f, 0.389584f, -0.897512f));
+    testSGGXPhase(phase, retS, Vector3f(-0.876790f, -0.275073f, -0.394429f));
+    testSGGXPhase(phase, retS, Vector3f(-0.735200f, 0.168386f, 0.656603f));
+}
+
+void testSGGX(const Medium* media)
+{
+    testSGGX(media, Point3f(0.832144797f, 0.244027168f, -0.0746706426f));
+    testSGGX(media, Point3f(0.838104963f, 0.243400171f, 0.373351246f));
+    testSGGX(media, Point3f(-0.678627431f, 0.243626177f, 0.496233493f));
+    testSGGX(media, Point3f(0.194587067f, 0.243683904f, 0.428672642f));
+    testSGGX(media, Point3f(0.172038004f, 0.244669035f, -0.0798287392f));
 }
 
 int mts_main(int argc, char **argv) {

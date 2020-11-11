@@ -154,6 +154,10 @@ public:
     virtual Spectrum evalTransmittance(const Ray &ray,
         Sampler *sampler = NULL) const = 0;
 
+    virtual void lookupSGGX(const Point &_p, Float *S) const {
+        Log(EError, "'%s': does not implement lookupSGGX()!", getClass()->getName().c_str());
+    }
+
     /// Return the phase function of this medium
     inline const PhaseFunction *getPhaseFunction() const { return m_phaseFunction.get(); }
 
