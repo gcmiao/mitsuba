@@ -130,9 +130,13 @@ public:
          * the file (which had better exist if unserialization
          * occurs on a remote machine).
          */
-         m_sendData = props.getBoolean("sendData", false);
-
-         loadFromFile(props.getString("filename"));
+        m_sendData = props.getBoolean("sendData", false);
+        auto filename = props.getString("filename");
+        // if (filename.find("sggx.vol") != std::string::npos)
+        // {
+        //    freopen("SGGX-test-cases.txt","w", stdout);
+        // }
+        loadFromFile(filename);
     }
 
     GridDataSource(Stream *stream, InstanceManager *manager)
@@ -158,6 +162,7 @@ public:
     virtual ~GridDataSource() {
         if (!m_mmap)
             delete[] m_data;
+        fclose(stdout);
     }
 
     size_t getVolumeSize() const {
@@ -586,7 +591,10 @@ public:
         if (m_volumeType != EUInt8) {
             return;
         }
+        // printf("%.9f %.9f %.9f\n", _p.x, _p.y, _p.z);
+
         const Point p = m_worldToGrid.transformAffine(_p);
+        // printf("p = Point3f(%ff, %ff, %ff);\n", p.x, p.y, p.z);
         const int x1 = math::floorToInt(p.x),
             y1 = math::floorToInt(p.y),
             z1 = math::floorToInt(p.z),
@@ -594,7 +602,16 @@ public:
         memset(S, 0, 6*sizeof(Float));
         if (x1 < 0 || y1 < 0 || z1 < 0 || x2 >= m_res.x ||
             y2 >= m_res.y || z2 >= m_res.z)
+            {
+                S[0] = 0;
+                S[1] = 0;
+                S[2] = 0;
+                S[3] = 0;
+                S[4] = 0;
+                S[5] = 0;
+                // printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
                 return;
+            }
         const Float fx = p.x - x1, fy = p.y - y1, fz = p.z - z1;
         Float _fx = 1.0f - fx, _fy = 1.0f - fy, _fz = 1.0f - fz;
         Vector sigma;
@@ -621,6 +638,7 @@ public:
             S[4] += factor * r.y * sigma.x * sigma.z;
             S[5] += factor * r.z * sigma.y * sigma.z;
         }
+        // printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
     }
     bool supportsFloatLookups() const { return m_channels == 1; }
     bool supportsSpectrumLookups() const { return m_channels == 3; }

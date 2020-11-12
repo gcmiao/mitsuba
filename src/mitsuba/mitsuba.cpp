@@ -474,19 +474,25 @@ void testSGGX(const Medium* media, const Point3f& p)
     printf("%f %f %f %f %f\n", retS[0], retS[1], retS[2], retS[3], retS[4], retS[5]);
 
     auto phase = media->getPhaseFunction();
-    testSGGXPhase(phase, retS, Vector3f(-0.938753f, -0.334289f, -0.083629f));
-    testSGGXPhase(phase, retS, Vector3f(-0.206632f, 0.389584f, -0.897512f));
-    testSGGXPhase(phase, retS, Vector3f(-0.876790f, -0.275073f, -0.394429f));
-    testSGGXPhase(phase, retS, Vector3f(-0.735200f, 0.168386f, 0.656603f));
+    // testSGGXPhase(phase, retS, Vector3f(-0.938753f, -0.334289f, -0.083629f));
+    // testSGGXPhase(phase, retS, Vector3f(-0.206632f, 0.389584f, -0.897512f));
+    // testSGGXPhase(phase, retS, Vector3f(-0.876790f, -0.275073f, -0.394429f));
+    // testSGGXPhase(phase, retS, Vector3f(-0.735200f, 0.168386f, 0.656603f));
 }
 
 void testSGGX(const Medium* media)
 {
-    testSGGX(media, Point3f(0.832144797f, 0.244027168f, -0.0746706426f));
-    testSGGX(media, Point3f(0.838104963f, 0.243400171f, 0.373351246f));
-    testSGGX(media, Point3f(-0.678627431f, 0.243626177f, 0.496233493f));
-    testSGGX(media, Point3f(0.194587067f, 0.243683904f, 0.428672642f));
-    testSGGX(media, Point3f(0.172038004f, 0.244669035f, -0.0798287392f));
+    fclose(stdout);
+    testSGGX(media, Point3f(-0.756227016f, -0.248953998f, 0.139204994f));
+    testSGGX(media, Point3f(-0.776120007f, -0.248953998f, 0.158344999f));
+    testSGGX(media, Point3f(-0.773416996f, -0.248953998f, 0.173190996f));
+    testSGGX(media, Point3f(-0.801132023f, -0.248953998f, 0.136347994f));
+    testSGGX(media, Point3f(-0.799290001f, -0.248953998f, 0.184388995f));
+    // testSGGX(media, Point3f(0.832144797f, 0.244027168f, -0.0746706426f));
+    // testSGGX(media, Point3f(0.838104963f, 0.243400171f, 0.373351246f));
+    // testSGGX(media, Point3f(-0.678627431f, 0.243626177f, 0.496233493f));
+    // testSGGX(media, Point3f(0.194587067f, 0.243683904f, 0.428672642f));
+    // testSGGX(media, Point3f(0.172038004f, 0.244669035f, -0.0798287392f));
 }
 
 int mts_main(int argc, char **argv) {
