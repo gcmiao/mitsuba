@@ -134,7 +134,7 @@ public:
         auto filename = props.getString("filename");
         if (filename.find("sggx.vol") != std::string::npos)
         {
-           mFileSGGX = fopen("SGGX-test-cases.txt","w");
+        //    mFileSGGX = fopen("SGGX-test-cases.txt","w");
         }
         loadFromFile(filename);
     }
@@ -592,7 +592,8 @@ public:
         if (m_volumeType != EUInt8) {
             return;
         }
-        fprintf(mFileSGGX, "%.9f %.9f %.9f\n", _p.x, _p.y, _p.z);
+        if (mFileSGGX)
+            fprintf(mFileSGGX, "%.9f %.9f %.9f\n", _p.x, _p.y, _p.z);
 
         const Point p = m_worldToGrid.transformAffine(_p);
         const int x1 = math::floorToInt(p.x),
@@ -609,7 +610,8 @@ public:
                 S[3] = 0;
                 S[4] = 0;
                 S[5] = 0;
-                fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
+                if (mFileSGGX)
+                    fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
                 return;
             }
         const Float fx = p.x - x1, fy = p.y - y1, fz = p.z - z1;
@@ -638,8 +640,10 @@ public:
             S[4] += factor * r.y * sigma.x * sigma.z;
             S[5] += factor * r.z * sigma.y * sigma.z;
         }
-        fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
+        if (mFileSGGX)
+            fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
     }
+
     bool supportsFloatLookups() const { return m_channels == 1; }
     bool supportsSpectrumLookups() const { return m_channels == 3; }
     bool supportsVectorLookups() const { return m_channels == 3; }
