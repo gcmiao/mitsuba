@@ -56,14 +56,17 @@ public:
     }
 
     virtual ~SGGXPhaseFunction() {
-        fclose(stdout);
+        fclose(mFileSample);
+        fclose(mFileEval);
+        fclose(mFileSigmaDir);
     }
 
     void configure() {
         PhaseFunction::configure();
         m_type = EAnisotropic | ENonSymmetric;
-        // freopen("SGGX-phase-sample-test-cases.txt","w", stdout);
-        freopen("SGGX-phase-eval-test-cases.txt","w", stdout);
+        mFileSample = fopen("SGGX-phase-sample-test-cases.txt","w");
+        mFileEval = fopen("SGGX-phase-eval-test-cases.txt","w");
+        mFileSigmaDir = fopen("SGGX-phase-sigma-dir-test-cases.txt","w");
     }
 
     void serialize(Stream *stream, InstanceManager *manager) const {
@@ -71,8 +74,6 @@ public:
     }
 
     Float eval(const PhaseFunctionSamplingRecord &pRec) const {
-        // printf("wi = Vector3f(%ff, %ff, %ff);\n", pRec.wi.x, pRec.wi.y, pRec.wi.z);
-        // printf("wo = Vector3f(%ff, %ff, %ff);\n", pRec.wo.x, pRec.wo.y, pRec.wo.z);
         Float Sxx = pRec.mRec.sggxS[0];
         Float Syy = pRec.mRec.sggxS[1];
         Float Szz = pRec.mRec.sggxS[2];
@@ -91,10 +92,10 @@ public:
             value = 0.0;
         }
 
-        printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", Sxx, Syy, Szz, Sxy, Sxz, Syz);
-        printf("%.9f %.9f %.9f\n", pRec.wi.x, pRec.wi.y, pRec.wi.z);
-        printf("%.9f %.9f %.9f\n", pRec.wo.x, pRec.wo.y, pRec.wo.z);
-        printf("%.9f\n", value);
+        fprintf(mFileEval, "%.9f %.9f %.9f %.9f %.9f %.9f\n", Sxx, Syy, Szz, Sxy, Sxz, Syz);
+        fprintf(mFileEval, "%.9f %.9f %.9f\n", pRec.wi.x, pRec.wi.y, pRec.wi.z);
+        fprintf(mFileEval, "%.9f %.9f %.9f\n", pRec.wo.x, pRec.wo.y, pRec.wo.z);
+        fprintf(mFileEval, "%.9f\n", value);
         
         return value;
     }
@@ -115,16 +116,15 @@ public:
         wi = normalize(wi);
         
         Point2 point = sampler->next2D();
-        //printf("sampler = Point2f(%ff, %ff);\n", point.x, point.y);
         Vector wo = sample_specular(wi, Sxx, Syy, Szz, Sxy, Sxz, Syz, point.x, point.y);
         wo = normalize(wo);
         if (wo.x != wo.x || wo.y != wo.y || wo.z != wo.z) {
             return 0.0;
         }
-        // printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", Sxx, Syy, Szz, Sxy, Sxz, Syz);
-        // printf("%.9f %.9f\n", point.x, point.y);
-        // printf("%.9f %.9f %.9f\n", pRec.wi.x, pRec.wi.y, pRec.wi.z);
-        // printf("%.9f %.9f %.9f\n", wo.x, wo.y, wo.z);
+        fprintf(mFileSample, "%.9f %.9f %.9f %.9f %.9f %.9f\n", Sxx, Syy, Szz, Sxy, Sxz, Syz);
+        fprintf(mFileSample, "%.9f %.9f\n", point.x, point.y);
+        fprintf(mFileSample, "%.9f %.9f %.9f\n", pRec.wi.x, pRec.wi.y, pRec.wi.z);
+        fprintf(mFileSample, "%.9f %.9f %.9f\n", wo.x, wo.y, wo.z);
         pRec.wo = Vector(wo.x,wo.y,wo.z);
 
         return 1.0f;
@@ -143,9 +143,11 @@ public:
 
     Float sigmaDirSGGX(Float *S, Vector v) const {
         Vector wi = Vector(v);
-        // printf("v = Vector3f(%ff, %ff, %ff);\n", v.x, v.y, v.z);
         wi = normalize(wi);
         float ret = sigma(wi,S[0],S[1],S[2],S[3],S[4],S[5]);
+        fprintf(mFileSigmaDir, "%.9f %.9f %.9f\n", v.x, v.y, v.z);
+        fprintf(mFileSigmaDir, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
+        fprintf(mFileSigmaDir, "%.9f\n", ret);
         return ret;
     }
 
@@ -162,7 +164,9 @@ public:
 
     MTS_DECLARE_CLASS()
 private:
-    
+    FILE * mFileSample;
+    FILE * mFileEval;
+    FILE * mFileSigmaDir;
 };
 
 MTS_IMPLEMENT_CLASS_S(SGGXPhaseFunction, false, PhaseFunction)

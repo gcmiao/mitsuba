@@ -132,10 +132,10 @@ public:
          */
         m_sendData = props.getBoolean("sendData", false);
         auto filename = props.getString("filename");
-        // if (filename.find("sggx.vol") != std::string::npos)
-        // {
-        //    freopen("SGGX-test-cases.txt","w", stdout);
-        // }
+        if (filename.find("sggx.vol") != std::string::npos)
+        {
+           mFileSGGX = fopen("SGGX-test-cases.txt","w");
+        }
         loadFromFile(filename);
     }
 
@@ -162,7 +162,8 @@ public:
     virtual ~GridDataSource() {
         if (!m_mmap)
             delete[] m_data;
-        fclose(stdout);
+        if (mFileSGGX)
+            fclose(mFileSGGX);
     }
 
     size_t getVolumeSize() const {
@@ -591,10 +592,9 @@ public:
         if (m_volumeType != EUInt8) {
             return;
         }
-        // printf("%.9f %.9f %.9f\n", _p.x, _p.y, _p.z);
+        fprintf(mFileSGGX, "%.9f %.9f %.9f\n", _p.x, _p.y, _p.z);
 
         const Point p = m_worldToGrid.transformAffine(_p);
-        // printf("p = Point3f(%ff, %ff, %ff);\n", p.x, p.y, p.z);
         const int x1 = math::floorToInt(p.x),
             y1 = math::floorToInt(p.y),
             z1 = math::floorToInt(p.z),
@@ -609,7 +609,7 @@ public:
                 S[3] = 0;
                 S[4] = 0;
                 S[5] = 0;
-                // printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
+                fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
                 return;
             }
         const Float fx = p.x - x1, fy = p.y - y1, fz = p.z - z1;
@@ -638,7 +638,7 @@ public:
             S[4] += factor * r.y * sigma.x * sigma.z;
             S[5] += factor * r.z * sigma.y * sigma.z;
         }
-        // printf("%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
+        fprintf(mFileSGGX, "%.9f %.9f %.9f %.9f %.9f %.9f\n", S[0], S[1], S[2], S[3], S[4], S[5]);
     }
     bool supportsFloatLookups() const { return m_channels == 1; }
     bool supportsSpectrumLookups() const { return m_channels == 3; }
@@ -687,6 +687,9 @@ protected:
     Float m_cosTheta[256], m_sinTheta[256];
     Float m_cosPhi[256], m_sinPhi[256];
     Float m_densityMap[256];
+
+private:
+    FILE* mFileSGGX = nullptr;
 };
 
 MTS_IMPLEMENT_CLASS_S(GridDataSource, false, VolumeDataSource);
