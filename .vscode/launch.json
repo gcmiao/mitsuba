@@ -4,8 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "g++ - Build and debug active file",
+            "name": "mitsuba",
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/gcmiao/Codes/mitsuba/dist/mitsuba",
@@ -13,21 +14,40 @@
                 "/home/gcmiao/Codes/thesis-gao/code/mitsuba/rb-sggx-opt-envmap.xml",
                 "-o",
                 // "tomato_only_cpu_iso",
-                "tomato_sggx_surface_mts1_cpu",
-                // "-Dspp=16",
-                // "-Dres=64",
-                // "-Dmax_depth=16",
-                "-Dspp=128",
+                // "uniform_cube_surface_mts1_cpu",
+                // "tomato_sggx_surface_mts1_cpu-vol256-32-s44_341-iso",
+                // "tomato_sggx_surface_mts1_cpu-vol256-32-s160_299-iso",
+                "tomato_sggx_surface_mts1_cpu-vol256-32-s140_94",
+
+                // "-DsensorPos=4.2693, 4.6757, 1.4700", // s44_341
+                // "-DsensorPos=1.0778, -6.1080, 1.9444", // s160_299
+                "-DsensorPos=-0.2915, -4.9793, -4.1679", // s140_94
                 "-Dres=256",
-                "-Dmax_depth=64",
-                "-DlightRotationY=120",
+                "-Dspp=256",
+                // "-Dspp=512",
+                "-Dmax_depth=36",
+                "-DmediumScaleXZ=1.25",
+                "-DmediumScaleY=1.25",
+                "-Dobj1ScaleXZ=1.25",
+                "-Dobj1ScaleY=1.25",
+                // "-Dmax_depth=16",
+                // "-DlightRotationY=0",
                 // "-Dvolume_albedo=/home/gcmiao/Codes/thesis-gao/code/mitsuba2-rbp/data/tomato-iso-uint8_albedo.vol",
                 // "-Dvolume_density=/home/gcmiao/Codes/thesis-gao/code/mitsuba2-rbp/data/tomato-iso-uint8_density.vol",
                 // "-Dvolume_sggx=/home/gcmiao/Codes/thesis-gao/code/mitsuba2-rbp/data/tomato-iso-uint8_sggx.vol",
-                "-Dvolume_albedo=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_albedo.vol",
-                "-Dvolume_density=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_density.vol",
-                "-Dvolume_sggx=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_sggx.vol",
-                "-Dcube_mesh=/home/gcmiao/Codes/mitsuba2-backpropa/scenes/medium-opt/meshes/cube_unit.obj"
+                // "-Dvolume_albedo=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_albedo.vol",
+                // "-Dvolume_density=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_density.vol",
+                // "-Dvolume_sggx=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8_sggx.vol",
+                //  "-Dvolume_albedo=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8/tomato-sggx-surface-uint8-119-119-58_albedo.vol",
+                // "-Dvolume_density=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8/tomato-sggx-surface-uint8-119-119-58_density.vol",
+                //    "-Dvolume_sggx=/home/gcmiao/Codes/thesis-gao/code/mitsuba/data/tomato-sggx-surface-uint8/tomato-sggx-surface-uint8-119-119-58_sggx.vol",
+                // "-Dcube_mesh=/home/gcmiao/Codes/mitsuba2-backpropa/scenes/medium-opt/meshes/cube_unit.obj"
+                 "-Dvolume_albedo=/home/gcmiao/Codes/thesis-gao/code/mitsuba/output/final/mts1-tomatos/tomato-sggx-surface-compact-uint8/tomato-sggx-surface-compact-uint8-256-256-32_albedo.vol",
+                "-Dvolume_density=/home/gcmiao/Codes/thesis-gao/code/mitsuba/output/final/mts1-tomatos/tomato-sggx-surface-compact-uint8/tomato-sggx-surface-compact-uint8-256-256-32_density.vol",
+                   "-Dvolume_sggx=/home/gcmiao/Codes/thesis-gao/code/mitsuba/output/final/mts1-tomatos/tomato-sggx-surface-compact-uint8/tomato-sggx-surface-compact-uint8-256-256-32_sggx.vol",
+                "-Dcube_mesh=/home/gcmiao/Codes/mitsuba2-backpropa/scenes/medium-opt/meshes/cube_unit.obj",
+                "-Denvmap=/home/gcmiao/Codes/thesis-gao/code/mitsuba2-rbp/data/envmap-1024-512-sg-315-30-amp30000.exr"
+                // "-Denvmap=/home/gcmiao/Codes/thesis-gao/code/mitsuba2-rbp/data/abandoned_tank_farm_04_1k.hdr"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
